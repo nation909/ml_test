@@ -46,4 +46,5 @@ with tf.Session() as sess:
         sess.run(gradient_decent)
         # 100번마다 결과출력
         if step % 100 == 0:
-            print("Epoch: %.f, RMSE = %.f, 기울기a = %.4f, y절편 b = %.4f" % (step, sess.run(rmse), sess.run(a), sess.run(b)))
+            print(
+                "Epoch: %.f, RMSE = %.f, 기울기a = %.4f, y절편 b = %.4f" % (step, sess.run(rmse), sess.run(a), sess.run(b)))
