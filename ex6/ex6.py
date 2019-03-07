@@ -35,6 +35,9 @@ gradient_decent = tf.train.GradientDescentOptimizer(learning_rate).minimize(loss
 # 결과값 출력
 with tf.Session() as sess:
     sess.run(tf.global_variables_initializer())
+    X = tf.placeholder(tf.float64, shape=[None, 1])  # 1차원 행렬
+    result = sess.run(y, feed_dict={X: x_data})
+    print("result: {}".format(result))
 
     for i in range(60001):
         sess.run(gradient_decent)
