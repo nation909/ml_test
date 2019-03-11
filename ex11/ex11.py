@@ -1,3 +1,7 @@
+# 과적합피하기
+# 오차역전파 알고리즘을 사용한 신경망이 광석과 돌을 구분하는데 효과적인지 실험
+
+
 from keras.models import Sequential
 from keras.layers.core import Dense
 from sklearn.preprocessing import LabelEncoder
