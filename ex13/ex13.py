@@ -63,7 +63,7 @@ modelpath = MODEL_DIR + '{epoch:02d}-{val_loss:.4f}.hdf5'
 from keras.callbacks import ModelCheckpoint
 
 # 케라스 내부 예약어
-# 테스트오차: val_loss, 정확도: acc, 테스트셋정확도: val_acc, 학습셋 오차: loss
+# 테스트오차: val_loss, 학습셋 정확도: acc, 테스트셋정확도: val_acc, 학습셋 오차: loss
 # save_best_only=True: 앞 모델보다 나아졌을때만 저장
 checkpointer = ModelCheckpoint(filepath=modelpath, monitor='val_loss', verbose=1, save_best_only=True)
 model.fit(X, Y, validation_split=0.2, epochs=200, batch_size=200, verbose=0, callbacks=[checkpointer])
