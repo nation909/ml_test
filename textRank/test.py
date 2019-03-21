@@ -1,10 +1,15 @@
-import numpy
-text = ' 안녕 하세요. 김호 근 입 니다. '
-text = text.strip()
-print(text.strip())
-print(len(text))
-print(text[-1])
+# -*- coding: utf-8 -*-
 
-a = [1, 2, 3]
-b = [4, 5, 6]
-print(numpy.matmul(a, b))
+from keras.preprocessing.text import Tokenizer
+from keras.preprocessing.sequence import pad_sequences
+import numpy as np
+import pandas as pd
+
+data = pd.read_csv('../dataset/calltype_data.csv', encoding='euc-kr')
+print(data.head(5))
+print(data.g)
+
+tokenizer = Tokenizer()
+# tokenizer.fit_on_texts(text)
+# sequence = tokenizer.fit_on_sequences(text)
+# print(sequence)
