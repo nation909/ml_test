@@ -7,7 +7,9 @@ import pandas as pd
 
 data = pd.read_csv('../dataset/calltype_data.csv', encoding='euc-kr')
 print(data.head(5))
-print(data.g)
+print(data['STT_CONT'])
+print(data['STT_CONT'][0])
+
 
 tokenizer = Tokenizer()
 # tokenizer.fit_on_texts(text)
