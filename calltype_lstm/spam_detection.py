@@ -22,9 +22,9 @@ print(data[:5])
 X_train = data['v2']
 Y_train = data['v1']
 print(len(X_train))
-print(X_train)
+# print(X_train)
 print(len(Y_train))
-print(Y_train)
+# print(Y_train)
 
 tokenizer = Tokenizer()
 tokenizer.fit_on_texts(X_train) #5572개의 행을 가진 X_train의 각 행에 토큰화를 수행
