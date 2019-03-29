@@ -1,71 +1,55 @@
-import os
-
-import pandas as pd
-from keras.callbacks import ModelCheckpoint, EarlyStopping
-from keras.layers import Embedding, Dense, LSTM
-from keras.models import Sequential
+from IPython import display
 from keras.preprocessing import sequence
-from keras.utils import np_utils
+from konlpy.tag import Twitter
+from numpy.ma import argmax
+from tensorflow.python.keras.models import load_model
+import numpy as np
+import pandas as pd
 
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
+x = [[11, 4, 1309, 43, 22, 67, 36, 82, 24, 1, 16, 303, 391, 7, 276, 95, 35, 16, 12, 55, 53, 44, 36, 574, 65, 1, 55, 14,
+      89, 247, 5, 61, 1, 104, 142, 41, 447, 5, 961, 14, 483, 64, 14, 16, 203, 36, 3, 1, 61, 80, 5, 2, 19, 8, 7, 6997,
+      421, 1, 30, 1, 42, 72, 81, 2, 17, 151, 2, 144, 3, 61, 61, 2, 101, 1, 61, 487, 277, 110, 27, 328, 102, 41, 5, 483,
+      276, 64, 1, 14, 76, 55, 36, 3, 16, 303, 1, 192, 32, 53, 6, 99, 3, 725, 5221, 15510, 868, 6, 45, 101, 3, 6, 4150,
+      31, 6, 294, 163, 344, 83, 147, 34, 51, 54, 143, 106, 6, 77, 199, 132, 131, 2001, 1, 25, 57, 1351, 446, 1188, 316,
+      1401, 131, 1, 357]]
 
-data = pd.read_csv('../dataset/call_preprocessing.csv', encoding='euc-kr', delimiter=',',
-                   converters={"STT_CONT_INDEX": lambda x: x.strip("[]").replace("'", "").split(", ")})
-data = data[:100]
-print(data.head(5))
-print(data.info())
+# 상담콜 전처리 데이터 csv 로드
+data = pd.read_csv('../dataset/calldata_csv/20190329/call_preprocessing.csv', encoding='euc-kr', delimiter=',')
+input_callText = data['STT_CONT'][0]
+result_true = data['CALL_L_CLASS_CD'][0]
 
-allCallWordNum = 10000
-callWordNum = 1000
-trainSet = 0.8  # 트레이닝셋 %
-testSet = 0.2  # 테스트셋 %
-batch_size = 10
-epochs = 50
-patience = 10
+twitter = Twitter()
+stopwords = ['네네', '디큐']  # 금지어
+nounLength = 2  # okt 명사추출 글자수 이상
+contNouns = []
+tempList = []
 
-dataset = data.values
-# print("dataset: {}".format(dataset))
+print("원본 상담콜: ", input_callText)
 
-X_train = dataset[:, 2]
-Y_train = dataset[:, 1:2]
+tempList = twitter.nouns(input_callText)
+contNouns.append([noun for noun in tempList if noun not in stopwords])
+print("상담콜 명사 추출: ", contNouns)
 
-n_of_train = int(round(len(X_train) * trainSet))  # 트레이닝셋 개수. 올림
-n_of_test = int(round((len(X_train)) * testSet))  # 트레이닝셋 개수. 올림
-print("샘플 개수: %d" % len(X_train))
-print("트레이닝셋 개수: %d, 트레이닝셋: %d" % (n_of_train, (trainSet * 100)))
-print("테스트셋 개수: %d, 테스트셋: %d" % (n_of_test, (testSet * 100)))
+#  converters={"nounsAllIndex": lambda x: x.strip("[]").replace("'", "").split(", ")}
+call_result = pd.read_csv('../dataset/calldata_csv/20190329/call_result.csv', encoding='euc-kr', delimiter=',',
+                          converters={"nounsAllIndex": lambda x: dict(x).strip("[]").replace("'", "").split(", ")})
+print("call_result.head(5): ", call_result.head(5))
+print("call_result.info(): ", call_result.info())
+nounsIndex = call_result['nounsAllIndex']
+# print("nounsIndex: ", type(nounsIndex), nounsIndex)
+for i in nounsIndex:
+    print("i: ", type(i), dict(i))
 
-# 트레이닝셋, 테스트셋 설정
-x_train = sequence.pad_sequences(X_train[:n_of_train], maxlen=callWordNum)  # 트레이닝셋 x
-y_train = np_utils.to_categorical(Y_train[:n_of_train], 14)  # 트레이닝셋 y
-x_test = sequence.pad_sequences(X_train[n_of_train:], maxlen=callWordNum)  # 테스트셋 x
-y_test = np_utils.to_categorical(Y_train[n_of_train:], 14)  # 테스트셋 y
+# 모델 로드
+# model = load_model('./model/call_lstm_model.hdf5')
 
-# 모델 설정
-model = Sequential()
-# Embedding()함수로 데이터 전처리과정을 통해 입력된 값을 받아 다음층이 알수 있는 형태로 변환
-# 모델 설정부분의 맨 처음에 있어야 함
-# Embedding(불러온 단어의 총개수(1000), 상담콜당 단어수(100))
-model.add(Embedding(allCallWordNum + 1, callWordNum))
-# LSTM()함수는 RNN에서 기억값에 대한 가중치를 제어함
-# LSTM(기사당 단어수(100), 기타옵션(tanh활성화 함수를 사용)))
-model.add(LSTM(callWordNum, activation="tanh"))
-model.add(Dense(14, activation="softmax"))
-
-# 모델 컴파일
-model.compile(loss="categorical_crossentropy", optimizer="adam", metrics=["accuracy"])
-
-MODEL_DIR = './model/'
-if not os.path.exists(MODEL_DIR):
-    os.mkdir(MODEL_DIR)
-
-modelpath = MODEL_DIR + "{epoch: 02d}-{val_loss: .4f}.hdf5"
-checkpointer = ModelCheckpoint(filepath=modelpath, monitor='val_loss', verbose=1, save_best_only=True)
-
-early_stopping_callback = EarlyStopping(monitor='val_loss', patience=patience)
-
-# 모델 실행
-# 20개의 스텝으로 100개씩 학습. x_test, y_test가 테스트셋
-history = model.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=epochs, batch_size=batch_size,
-                    callbacks=[checkpointer, early_stopping_callback])
-print("정확도: %.4f" % (model.evaluate(x_test, y_test)[1]))
+# input 데이터 상담유형 예측
+# input_callText = sequence.pad_sequences(contNouns[0])
+# result_predict = model.predict(input_callText)
+# print("input_callText: ", x)
+# print("x_test: ", input_callText)
+# print("result_predict: ", result_predict)
+#
+# result_predict = argmax(result_predict)
+# print("예측유형: %d" % result_predict)
+# print(result_predict[0][argmax])

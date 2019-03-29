@@ -12,9 +12,8 @@ from konlpy.tag import Twitter, Kkma
 # csv 데이터 okt로 명사 추출
 twitter = Twitter()
 kkma = Kkma()
-_stopwords = []  # 금지어
-nounLength = 1  # okt 명사추출 글자수 이상
-maxNouns = 10000  # 상담콜전체 명사 카운트 개수
+_stopwords = ['네네', '디큐']  # 금지어
+nounLength = 2  # okt 명사추출 글자수 이상
 
 
 # 상담콜별 명사 추출
@@ -24,8 +23,8 @@ def contNounsExtract(cont, nounLength=2):
     startTime = time()
     contNouns = []
     index = 1
-    # for text in cont[:5]:
-    for text in cont:
+    for text in cont[:5]:
+    # for text in cont:
         index += 1
         try:
             tempList = []
@@ -68,7 +67,7 @@ def contNounsCount(contNouns):
 
 
 # 상담콜전체 명사 카운트
-def contNounsAllCount(contNouns, maxNouns=10000):
+def contNounsAllCount(contNouns):
     # print("def contNounsAllCount:", contNouns)
     print("===========================3단계: 상담콜별 명사 카운트 start===========================")
     startTime = time()
@@ -80,7 +79,7 @@ def contNounsAllCount(contNouns, maxNouns=10000):
             else:
                 nounsAllCountDict[k] = i[k]
 
-    nounsAllCountDict = dict(sorted(nounsAllCountDict.items(), key=lambda kv: kv[1], reverse=True)[:maxNouns])
+    nounsAllCountDict = dict(sorted(nounsAllCountDict.items(), key=lambda kv: kv[1], reverse=True))
     endTime = time()
     print("상담콜전체 명사 카운트 Time: %.3f" % (endTime - startTime))
     print("===========================3단계: 상담콜별 명사 카운트 end===========================")
@@ -111,10 +110,7 @@ def nounsIndex(nouns, nounsAllIndex):
 
     for noun in nouns:
         if noun in nounsAllIndex.keys():
-            if maxNouns >= nounsAllIndex.get(noun):
-                nounIndexList.append(nounsAllIndex.get(noun))
-            else:
-                print("상담콜별 명사 index 예외 키워드 ", noun, nounsAllIndex.get(noun))
+            nounIndexList.append(nounsAllIndex.get(noun))
     return nounIndexList
 
 
@@ -129,7 +125,7 @@ class DataPreprocessing:
         self.nounsCount = contNounsCount(self.nouns)  # 문장별 명사 count수
         # print("self.nounsCount: ", self.nounsCount)
 
-        self.nounsAllCount = contNounsAllCount(self.nounsCount, maxNouns)  # 전체문장 명사 count수 내림차순 정렬 EX. {명사:count수}
+        self.nounsAllCount = contNounsAllCount(self.nounsCount)  # 전체문장 명사 count수 내림차순 정렬 EX. {명사:count수}
         # print("self.nounsAllCount: ", self.nounsAllCount)
 
         self.nounsAllIndex = nounsAllIndex(self.nounsAllCount)  # 전체문장 명사 index EX. {명사:index번호}
@@ -150,7 +146,7 @@ class DataPreprocessing:
 # csv 데이터 로드
 data = pd.read_csv('../dataset/calldata_csv/original_calldata/calldata_original.csv', encoding='euc-kr')
 # csv 전처리(불필요 컬럼삭제, 컬럼수정 등)
-# data['CALL_LM_CLASS_NAME'] = data['CALL_L_CLASS_NAME'] + "^" + data['CALL_M_CLASS_NAME']
+data['CALL_LM_CLASS_NAME'] = data['CALL_L_CLASS_NAME'] + "^" + data['CALL_M_CLASS_NAME']
 del data['RECORDKEY']
 # del data['CALL_L_CLASS_CD']
 del data['CALL_M_CLASS_CD']
@@ -162,7 +158,7 @@ print(data.head(5))
 print("데이터건수: %d" % len(data))
 
 X_train = data['STT_CONT']
-Y_train = data['CALL_L_CLASS_CD']
+Y_train = data['CALL_LM_CLASS_NAME']
 
 preprcs = DataPreprocessing(X_train)
 nounsAllCount = preprcs.nounsAllCount
