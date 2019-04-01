@@ -6,7 +6,7 @@ import pandas as pd
 from pandas import Series
 from konlpy.tag import Twitter, Kkma
 
-# 샘플데이터 전처리
+# 데이터 전처리 py
 
 
 # csv 데이터 okt로 명사 추출
@@ -24,7 +24,7 @@ def contNounsExtract(cont, nounLength=2):
     contNouns = []
     index = 1
     for text in cont[:1000]:
-    # for text in cont:
+        # for text in cont:
         index += 1
         try:
             tempList = []

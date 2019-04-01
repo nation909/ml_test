@@ -9,6 +9,9 @@ from keras.preprocessing import sequence
 from keras.utils import np_utils
 from tensorflow.python.keras.models import load_model
 
+# LSTM 모델 저장 py
+
+
 data = pd.read_csv('../dataset/calldata_csv/20190329/call_preprocessing.csv', encoding='euc-kr', delimiter=',',
                    converters={"STT_CONT_INDEX": lambda x: x.strip("[]").replace("'", "").split(", ")})
 allCallWordDict = pd.read_csv('../dataset/calldata_csv/20190329/call_result.csv', encoding='euc-kr',
@@ -48,8 +51,8 @@ x_train = sequence.pad_sequences(X_train[:n_of_train], maxlen=callWordNum)  # �
 y_train = np_utils.to_categorical(Y_train[:n_of_train], 14)  # 트레이닝셋 y
 x_test = sequence.pad_sequences(X_train[n_of_train:], maxlen=callWordNum)  # 테스트셋 x
 y_test = np_utils.to_categorical(Y_train[n_of_train:], 14)  # 테스트셋 y
-print("x_train[0]: ", x_train[0])
-print("x_train[1]: ", x_train[1])
+# print("x_train[0]: ", x_train[0])
+# print("x_train[1]: ", x_train[1])
 
 # 모델 설정
 model = Sequential()

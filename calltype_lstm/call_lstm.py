@@ -8,6 +8,8 @@ from tensorflow.python.keras.models import load_model
 import numpy as np
 import pandas as pd
 
+# LSTM 모델 사용하기 py
+
 # 상담콜 전처리 데이터 csv 로드
 data = pd.read_csv('../dataset/calldata_csv/20190329/call_preprocessing.csv', encoding='euc-kr', delimiter=',')
 input_callText = data['STT_CONT'][2]
