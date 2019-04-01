@@ -1,3 +1,5 @@
+from collections import defaultdict
+
 import pandas as pd
 
 #  converters={"nounsAllIndex": lambda x: x.strip("[]").replace("'", "").split(", ")}
@@ -9,3 +11,4 @@ nounsIndex = call_result['nounsAllIndex']
 print("nounsIndex: ", type(nounsIndex), nounsIndex[:5])
 # for i in nounsIndex:
 #     print("i: ", type(i), i)
+

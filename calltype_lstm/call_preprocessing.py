@@ -23,7 +23,7 @@ def contNounsExtract(cont, nounLength=2):
     startTime = time()
     contNouns = []
     index = 1
-    for text in cont[:5]:
+    for text in cont[:1000]:
     # for text in cont:
         index += 1
         try:
@@ -172,7 +172,19 @@ nounsIndexList = preprcs.nounsIndexList
 data['STT_CONT_INDEX'] = Series(nounsIndexList)
 data.to_csv('../dataset/call_preprocessing.csv', index=False, encoding="euc-kr", mode="w", sep=",")
 
+nounsAllCountList = []
+for k, v in nounsAllCount.items():
+    tempDict = {}
+    tempDict[k] = v
+    nounsAllCountList.append(tempDict)
+
+nounsAllIndexList = []
+for k, v in nounsAllIndex.items():
+    tempDict = {}
+    tempDict[k] = v
+    nounsAllIndexList.append(tempDict)
+
 result = pd.DataFrame()
-result['nounsAllCount'] = nounsAllCount.items()
-result['nounsAllIndex'] = nounsAllIndex.items()
+result['nounsAllCount'] = Series(nounsAllCountList)
+result['nounsAllIndex'] = Series(nounsAllIndexList)
 result.to_csv('../dataset/call_result.csv', index=False, encoding="euc-kr", mode="w", sep=",")

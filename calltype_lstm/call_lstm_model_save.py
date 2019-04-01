@@ -21,10 +21,10 @@ print("data head: ", data.head(5))
 print("data info: ", data.info())
 
 allCallWordNum = len(allCallWordDict['nounsAllCount'])
-callWordNum = 200
+callWordNum = 100
 trainSet = 0.7  # 트레이닝셋 %
 testSet = 0.3  # 테스트셋 %
-batch_size = 1000
+batch_size = 100
 epochs = 20
 patience = 10
 
@@ -34,6 +34,7 @@ dataset = data.values
 
 X_train = dataset[:, 2]
 Y_train = dataset[:, 1:2]
+print("X_train: ", X_train)
 
 n_of_train = int(round(len(X_train) * trainSet))  # 트레이닝셋 개수. 올림
 n_of_test = int(round((len(X_train)) * testSet))  # 트레이닝셋 개수. 올림
