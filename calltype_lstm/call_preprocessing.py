@@ -3,18 +3,15 @@ import collections
 from datetime import time
 from time import time
 import pandas as pd
-from pandas import Series
 from konlpy.tag import Twitter, Kkma
+from pandas import Series
 
 # 데이터 전처리 py
-
-
 # csv 데이터 okt로 명사 추출
 twitter = Twitter()
 kkma = Kkma()
 _stopwords = ['네네', '디큐']  # 금지어
 nounLength = 2  # okt 명사추출 글자수 이상
-
 
 # 상담콜별 명사 추출
 def contNounsExtract(cont, nounLength=2):
@@ -24,7 +21,7 @@ def contNounsExtract(cont, nounLength=2):
     contNouns = []
     index = 1
     for text in cont[:1000]:
-        # for text in cont:
+    # for text in cont:
         index += 1
         try:
             tempList = []
@@ -44,11 +41,11 @@ def contNounsExtract(cont, nounLength=2):
         if index % 1000 == 0:
             print("===========================상담콜 명사추출 %d건 완료===========================" % index)
     print("명사추출 완료 %d건" % len(contNouns))
+    print("확인: ", contNouns[:10])
     endTime = time()
     print("상담콜별 명사 추출 Time: %.3f" % (endTime - startTime))
     print("===========================1단계: 상담콜별 명사추출 end===========================")
     return contNouns
-
 
 # 상담콜별 명사 빈도수 추출
 def contNounsCount(contNouns):
@@ -61,15 +58,15 @@ def contNounsCount(contNouns):
         contNounsCount.append(dict(collections.Counter(nouns)))
 
     endTime = time()
+    print("확인: ", contNounsCount[:10])
     print("상담콜별 명사 빈도수 추출 Time: %.3f" % (endTime - startTime))
     print("===========================2단계: 상담콜별 명사 빈도수 추출 end===========================")
     return contNounsCount
 
-
-# 상담콜전체 명사 카운트
+# 전체 상담콜 명사 카운트
 def contNounsAllCount(contNouns):
     # print("def contNounsAllCount:", contNouns)
-    print("===========================3단계: 상담콜별 명사 카운트 start===========================")
+    print("===========================3단계: 전체 상담콜 명사 카운트 start===========================")
     startTime = time()
     nounsAllCountDict = {}
     for i in contNouns:
@@ -81,10 +78,10 @@ def contNounsAllCount(contNouns):
 
     nounsAllCountDict = dict(sorted(nounsAllCountDict.items(), key=lambda kv: kv[1], reverse=True))
     endTime = time()
+    print("확인: ", nounsAllCountDict)
     print("상담콜전체 명사 카운트 Time: %.3f" % (endTime - startTime))
-    print("===========================3단계: 상담콜별 명사 카운트 end===========================")
+    print("===========================3단계: 전체 상담콜 명사 카운트 end===========================")
     return nounsAllCountDict
-
 
 # 전체문장 명사 index 추출
 def nounsAllIndex(nounsAllCount):
@@ -98,10 +95,10 @@ def nounsAllIndex(nounsAllCount):
         index += 1
 
     endTime = time()
+    print("확인: ", nounsAllIndex)
     print("전체문장 명사 index 추출 Time: %.3f" % (endTime - startTime))
     print("===========================4단계: 전체상담콜 명사 index 추출 end===========================")
     return nounsAllIndex
-
 
 # 상담콜별 명사 index 추출
 def nounsIndex(nouns, nounsAllIndex):
@@ -119,16 +116,16 @@ class DataPreprocessing:
     def __init__(self, cont):
         print("def __init__ start")
         self.sentence = cont  # 전체문장
-        self.nouns = contNounsExtract(cont, nounLength)  # 문장별 명사 추출
+        self.nouns = contNounsExtract(cont, nounLength)  # 상담콜별 문장별 명사 추출
         # print("self.nouns: ", self.nouns)
 
-        self.nounsCount = contNounsCount(self.nouns)  # 문장별 명사 count수
+        self.nounsCount = contNounsCount(self.nouns)  # 상담콜별 문장별 명사 빈도수 추출
         # print("self.nounsCount: ", self.nounsCount)
 
-        self.nounsAllCount = contNounsAllCount(self.nounsCount)  # 전체문장 명사 count수 내림차순 정렬 EX. {명사:count수}
+        self.nounsAllCount = contNounsAllCount(self.nounsCount)  # 전체 상담콜 명사 빈도수 카운트 내림차순 정렬 EX. {명사:count수}
         # print("self.nounsAllCount: ", self.nounsAllCount)
 
-        self.nounsAllIndex = nounsAllIndex(self.nounsAllCount)  # 전체문장 명사 index EX. {명사:index번호}
+        self.nounsAllIndex = nounsAllIndex(self.nounsAllCount)  # 상담콜별 명사 index로 변환 EX. {명사:index번호}
         # print("self.nounsAllIndex: ", self.nounsAllIndex)
 
         print("===========================5단계: 상담콜별 명사 index 추출 start===========================")
@@ -136,6 +133,7 @@ class DataPreprocessing:
         self.nounsIndexList = []  # 문장별 명사 index
         for nouns in self.nouns:
             self.nounsIndexList.append(nounsIndex(nouns, self.nounsAllIndex))
+        print("확인: ", self.nounsIndexList[:10])
         # print("self.nounsIndexList: ", self.nounsIndexList)
         endTime = time()
         print("문장별 명사 index 추출 Time: %.3f" % (endTime - startTime))
@@ -155,7 +153,7 @@ del data['CALL_END_TIME']
 del data['CALL_L_CLASS_NAME']
 del data['CALL_M_CLASS_NAME']
 print(data.head(5))
-print("데이터건수: %d" % len(data))
+# print("데이터건수: %d" % len(data))
 
 X_train = data['STT_CONT']
 Y_train = data['CALL_LM_CLASS_NAME']
@@ -168,7 +166,6 @@ nounsIndexList = preprcs.nounsIndexList
 # print("전체 문장 인덱스 리스트", nounsAllIndex)
 # print("문장별 인덱스 리스트: ", nounsIndexList)
 
-# data = pd.DataFrame(data={"STT_CONT_INDEX": nounsIndexList, "CALL_L_CLASS_CD": data['CALL_L_CLASS_CD']})
 data['STT_CONT_INDEX'] = Series(nounsIndexList)
 data.to_csv('../dataset/call_preprocessing.csv', index=False, encoding="euc-kr", mode="w", sep=",")
 
